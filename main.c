@@ -6,22 +6,10 @@
 
 int main()
 {
-    pid_t pid;
-    pid = fork();
+    char *argv[] = {"/bin/echo","hello", NULL};
+    printf("\n");
+    execve(argv[0], argv, NULL);
+    printf("done with execute");
 
-    //failure
-    if (pid == -1)
-    {
-        perror("ERROR!\n");
-        return 1;
-    }
-    //child
-    else if (pid==0){
-        sleep(3);
-        printf("Child process\n");
-    }
-    else {
-        wait(NULL);
-        printf("Parent process\n");
-    }
+    
 }
