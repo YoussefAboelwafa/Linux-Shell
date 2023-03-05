@@ -20,6 +20,7 @@ char *expr[2];
 
 // functions prototypes
 void shell();
+void execute_command();
 void shell_builtin_commands(char[]);
 
 int main()
@@ -37,7 +38,7 @@ void shell()
         // Prompt the user for input
         char buf[1024];
         getcwd(buf, sizeof(buf));
-        printf("JOE-SHELL >> %s >>", buf);
+        printf("JOE-SHELL:%s >>", buf);
 
         // Read the user's input
         if (!fgets(command, MAX_COMMAND_LENGTH, stdin))
@@ -67,9 +68,6 @@ void shell()
 
         args[i] = NULL;
 
-        // Execute the command
-        pid_t pid = fork();
-
         // Exit if the user enters "exit" as the command
         if (strcmp(args[0], "exit") == 0)
         {
@@ -78,38 +76,14 @@ void shell()
             exit(EXIT_SUCCESS);
         }
 
-        if (pid < 0)
+        if (strcmp(args[0], "echo") == 0 || strcmp(args[0], "cd") == 0 || strcmp(args[0], "export") == 0)
         {
-            perror("Failed to fork");
-            exit(EXIT_FAILURE);
+            char *c = args[0];
+            shell_builtin_commands(c);
         }
-        // In the child
-        else if (pid == 0)
-        {
-            fprintf(file, "created : child_id=%d, parent_id=%d\n", getpid(), getppid());
-            if (strcmp(args[0], "echo") == 0 || strcmp(args[0], "cd") == 0 || strcmp(args[0], "export") == 0)
-            {
-                char *c = args[0];
-                shell_builtin_commands(c);
-            }
-            else
-            {
-                if (execvp(args[0], args) == -1)
-                {
-                    perror("Failed to execute command");
-                    exit(EXIT_FAILURE);
-                }
-            }
-        }
-        // In the parent
         else
         {
-            int status;
-            if (waitpid(pid, &status, 0) == -1)
-            {
-                perror("Failed to wait for child process");
-                exit(EXIT_FAILURE);
-            }
+            execute_command();
         }
     }
 }
@@ -167,5 +141,37 @@ void shell_builtin_commands(char *string)
         expr[k] = NULL;
         var = expr[0];
         value = expr[1];
+    }
+}
+
+
+void execute_command()
+{
+    pid_t pid = fork();
+    // Error
+    if (pid < 0)
+    {
+        perror("Failed to fork");
+        exit(EXIT_FAILURE);
+    }
+    // In the child
+    else if (pid == 0)
+    {
+
+        if (execvp(args[0], args) == -1)
+        {
+            perror("Failed to execute command");
+            exit(EXIT_FAILURE);
+        }
+    }
+    // In the parent
+    else
+    {
+        int status;
+        if (waitpid(pid, &status, 0) == -1)
+        {
+            perror("Failed to wait for child process");
+            exit(EXIT_FAILURE);
+        }
     }
 }
