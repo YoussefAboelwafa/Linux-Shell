@@ -10,11 +10,11 @@
 char command[MAX_COMMAND_LENGTH];
 char *args[MAX_ARGUMENTS];
 
-#define RED    "\x1b[31m"
-#define BLUE   "\x1b[34m"
-#define GREEN  "\x1b[32m"
-#define YEL    "\e[0;33m"
-#define reset  "\x1b[0m"
+#define RED "\x1b[31m"
+#define BLUE "\x1b[34m"
+#define GREEN "\x1b[32m"
+#define YEL "\e[0;33m"
+#define reset "\x1b[0m"
 
 char *token;
 char *token2;
@@ -45,7 +45,7 @@ void shell()
         // Prompt the user for input
         char buf[1024];
         getcwd(buf, sizeof(buf));
-        printf(RED"JOE-SHELL:"reset YEL"%s >>"reset, buf);
+        printf(RED "JOE-SHELL:" reset YEL "%s >>" reset, buf);
 
         // Read the user's input
         if (!fgets(command, MAX_COMMAND_LENGTH, stdin))
@@ -174,7 +174,9 @@ void execute_command()
     else
     {
         int status;
-        if (waitpid(pid, &status, 0) == -1)
+        int var = waitpid(pid, &status, 0);
+        fprintf(file, "Child process (%d) terminated\n", pid);
+        if (var == -1)
         {
             perror("Failed to wait for child process");
             exit(EXIT_FAILURE);
