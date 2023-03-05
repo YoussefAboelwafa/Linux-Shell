@@ -9,6 +9,13 @@
 #define MAX_ARGUMENTS 64
 char command[MAX_COMMAND_LENGTH];
 char *args[MAX_ARGUMENTS];
+
+#define RED    "\x1b[31m"
+#define BLUE   "\x1b[34m"
+#define GREEN  "\x1b[32m"
+#define YEL    "\e[0;33m"
+#define reset  "\x1b[0m"
+
 char *token;
 char *token2;
 char *var;
@@ -38,7 +45,7 @@ void shell()
         // Prompt the user for input
         char buf[1024];
         getcwd(buf, sizeof(buf));
-        printf("JOE-SHELL:%s >>", buf);
+        printf(RED"JOE-SHELL:"reset YEL"%s >>"reset, buf);
 
         // Read the user's input
         if (!fgets(command, MAX_COMMAND_LENGTH, stdin))
@@ -88,7 +95,7 @@ void shell()
     }
 }
 
-void shell_builtin_commands(char *string)
+void shell_builtin_commands(char string[])
 {
     if (strcmp(string, "cd") == 0)
     {
@@ -143,7 +150,6 @@ void shell_builtin_commands(char *string)
         value = expr[1];
     }
 }
-
 
 void execute_command()
 {
