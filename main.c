@@ -4,6 +4,8 @@
 #include <sys/wait.h>
 #include <string.h>
 #include <stdbool.h>
+#include <signal.h>
+#include <sys/resource.h>
 
 #define MAX_COMMAND_LENGTH 1024
 #define MAX_ARGUMENTS 64
@@ -24,14 +26,19 @@ int i;
 int k;
 FILE *file;
 char *expr[2];
+int flag=0;
 
 // functions prototypes
 void shell();
 void execute_command();
 void shell_builtin_commands(char[]);
+void reap_child_zombie(pid_t);
+void write_to_log_file(pid_t);
+void on_child_exit(pid_t);
+void proc_exit();
 
 int main()
-{
+{   //signal (SIGCHLD, on_child_exit);
     file = fopen("logs.txt", "w");
     shell();
     return 0;
@@ -163,7 +170,6 @@ void execute_command()
     // In the child
     else if (pid == 0)
     {
-
         if (execvp(args[0], args) == -1)
         {
             perror("Failed to execute command");
@@ -173,13 +179,20 @@ void execute_command()
     // In the parent
     else
     {
-        int status;
-        int var = waitpid(pid, &status, 0);
-        fprintf(file, "Child process (%d) terminated\n", pid);
-        if (var == -1)
-        {
-            perror("Failed to wait for child process");
-            exit(EXIT_FAILURE);
-        }
+        on_child_exit(pid);
+        
     }
+}
+
+void reap_child_zombie(pid_t pid){
+    int status;
+    waitpid(pid, &status, 0);
+    
+}
+void write_to_log_file(pid_t pid){
+    fprintf(file, "Child process (%d) terminated\n", pid);
+}
+void on_child_exit(pid_t pid){
+    reap_child_zombie(pid);
+    write_to_log_file(pid);
 }
