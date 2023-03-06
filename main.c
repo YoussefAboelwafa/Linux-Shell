@@ -35,10 +35,10 @@ void shell_builtin_commands(char[]);
 void reap_child_zombie(pid_t);
 void write_to_log_file(pid_t);
 void on_child_exit(pid_t);
-void proc_exit();
 
 int main()
-{   //signal (SIGCHLD, on_child_exit);
+{   
+    //signal (SIGCHLD, on_child_exit);
     file = fopen("logs.txt", "w");
     shell();
     return 0;
@@ -46,9 +46,9 @@ int main()
 
 void shell()
 {
-
+    
     while (true)
-    {
+    {   
         // Prompt the user for input
         char buf[1024];
         getcwd(buf, sizeof(buf));
@@ -75,7 +75,7 @@ void shell()
         i = 0;
 
         while (token != NULL)
-        {
+        {  
             args[i++] = token;
             token = strtok(NULL, " ");
         }
@@ -159,7 +159,7 @@ void shell_builtin_commands(char string[])
 }
 
 void execute_command()
-{
+{   
     pid_t pid = fork();
     // Error
     if (pid < 0)
@@ -169,7 +169,10 @@ void execute_command()
     }
     // In the child
     else if (pid == 0)
-    {
+     {
+        //  if(strcmp(args[1],"&")==0){
+        //     flag=1;
+        //  }
         if (execvp(args[0], args) == -1)
         {
             perror("Failed to execute command");
@@ -186,7 +189,9 @@ void execute_command()
 
 void reap_child_zombie(pid_t pid){
     int status;
+    
     waitpid(pid, &status, 0);
+    
     
 }
 void write_to_log_file(pid_t pid){
