@@ -19,13 +19,11 @@ char *args[MAX_ARGUMENTS];
 #define reset "\x1b[0m"
 
 char *token;
-char *token2;
 char *var;
 char *value;
 int i;
 int k;
 FILE *file;
-char *expr[2];
 int flag=0;
 
 // functions prototypes
@@ -35,6 +33,9 @@ void shell_builtin_commands(char[]);
 void reap_child_zombie(pid_t);
 void write_to_log_file(pid_t);
 void on_child_exit(pid_t);
+void remove_quotes(char*);
+void replace_string(char*,char*,char*);
+char* extract_after_equal_sign(char*);
 
 int main()
 {   
@@ -121,40 +122,17 @@ void shell_builtin_commands(char string[])
 
     else if (strcmp(string, "echo") == 0)
     {
-        // Loop through the arguments and print them to the console
-        for (int i = 1; args[i] != NULL; i++)
-        {
-            if (args[i][0] == '"' && args[i][strlen(args[i]) - 1] == '"')
-            {
-                // If yes, print the argument without the quotes
-                printf("%.*s ", (int)(strlen(args[i]) - 2), args[i] + 1);
-            }
-            else if (args[i][0] == '$')
-            {
-                printf("%s", value);
-            }
-            else
-            {
-                // Otherwise, print the argument as is
-                printf("%s ", args[i]);
-            }
-        }
-        printf("\n");
+           
+        replace_string(args[1],"$x", value);
+        // Otherwise, print the argument as is
+        remove_quotes(args[1]);
+        printf("%s\n", args[1]); 
     }
     else if (strcmp(string, "export") == 0)
-    {
-        token2 = strtok(args[1], "=");
-        k = 0;
-
-        while (token2 != NULL)
-        {
-            expr[k++] = token2;
-            token2 = strtok(NULL, " ");
-        }
-
-        expr[k] = NULL;
-        var = expr[0];
-        value = expr[1];
+    {   
+        value = extract_after_equal_sign(args[1]);
+        remove_quotes(value);
+        printf("%s\n",value);       
     }
 }
 
@@ -200,4 +178,42 @@ void write_to_log_file(pid_t pid){
 void on_child_exit(pid_t pid){
     reap_child_zombie(pid);
     write_to_log_file(pid);
+}
+
+void remove_quotes(char* str) {
+    char* dest = str;
+    while (*str) {
+        if (*str != '"') {
+            *dest++ = *str;
+        }
+        str++;
+    }
+    *dest = '\0';
+}
+
+void replace_string(char* original_string, char* find_string, char* replace_string) {
+    char* occurrence = strstr(original_string, find_string); 
+    size_t find_len = strlen(find_string); 
+    
+    while (occurrence != NULL) { 
+        size_t occurrence_index = occurrence - original_string; 
+        size_t replace_len = strlen(replace_string); 
+        
+        memmove(original_string + occurrence_index + replace_len, 
+                original_string + occurrence_index + find_len,
+                strlen(original_string + occurrence_index + find_len) + 1);
+                
+        memcpy(original_string + occurrence_index, replace_string, replace_len); 
+        
+        occurrence = strstr(original_string + occurrence_index + replace_len, find_string);
+    }
+}
+char* extract_after_equal_sign(char* input_string) {
+    char* occurrence = strchr(input_string, '='); // find the first occurrence of '='
+    
+    if (occurrence != NULL) { // check if '=' was found
+        return occurrence + 1; // return the substring that follows the '='
+    } else {
+        return input_string; // return the whole input string if '=' was not found
+    }
 }
