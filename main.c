@@ -50,7 +50,8 @@ void shell()
 {
 
     while (true)
-    {   flag=0;
+    {
+        flag = 0;
         // Prompt the user for input
         char buf[1024];
         getcwd(buf, sizeof(buf));
@@ -77,23 +78,28 @@ void shell()
         i = 0;
 
         while (token != NULL)
-        {   
-                args[i++] = token;
-            
+        {
+            args[i++] = token;
+
             token = strtok(NULL, " ");
         }
 
         args[i] = NULL;
-        
-        if(args[1]!=NULL){
-            if(strcmp(args[1],"&")==0){
-                flag=1;
+
+        if (args[1] != NULL)
+        {
+            if (strcmp(args[1], "&") == 0)
+            {
+                flag = 1;
             }
         }
 
         // Exit if the user enters "exit" as the command
         if (strcmp(args[0], "exit") == 0)
         {
+            // zombie before exit
+            kill(id, SIGKILL);
+            on_signal_exit();
 
             fclose(file);
             exit(EXIT_SUCCESS);
@@ -156,8 +162,8 @@ void execute_command()
     }
     // In the child
     else if (pid == 0)
-    { 
-        
+    {
+
         if (execvp(args[0], args) == -1)
         {
             perror("Failed to execute command");
@@ -167,12 +173,12 @@ void execute_command()
     // In the parent
     else
     {
-        if(flag==0){
+        if (flag == 0)
+        {
             on_child_exit(pid);
         }
     }
 }
-
 
 void on_child_exit(pid_t pid)
 {
@@ -197,7 +203,8 @@ void write_to_log_file(pid_t pid)
     fprintf(file, "Child process (%d) terminated\n", pid);
 }
 
-void remove_quotes(char *str){
+void remove_quotes(char *str)
+{
     char *dest = str;
     while (*str)
     {
@@ -210,7 +217,8 @@ void remove_quotes(char *str){
     *dest = '\0';
 }
 
-void replace_string(char *original_string, char *find_string, char *replace_string){
+void replace_string(char *original_string, char *find_string, char *replace_string)
+{
     char *occurrence = strstr(original_string, find_string);
     size_t find_len = strlen(find_string);
 
@@ -229,7 +237,8 @@ void replace_string(char *original_string, char *find_string, char *replace_stri
     }
 }
 
-char *extract_after_equal_sign(char *input_string){
+char *extract_after_equal_sign(char *input_string)
+{
 
     char *occurrence = strchr(input_string, '='); // find the first occurrence of '='
 
@@ -242,4 +251,3 @@ char *extract_after_equal_sign(char *input_string){
         return input_string; // return the whole input string if '=' was not found
     }
 }
-
