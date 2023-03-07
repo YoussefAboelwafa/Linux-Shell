@@ -19,13 +19,13 @@ This shell supports the following commands:
 5. Shell builtin commands
     * **Commands**: `cd` & `echo`
     * **Details**: for the case of:</br>
-            * `cd ~` </br>
-            * `cd ..`</br>
-            * `cd <absolute_path>`</br>
-            * `cd <relative_path_to_current_working_directory>`</br>
-            * `echo "wow"` => wow</br>
-            * `export x=5`</br>
-            * `echo "Hello $x"` => Hello 5</br>
+             `cd ~` </br>
+             `cd ..`</br>
+             `cd <absolute_path>`</br>
+             `cd <relative_path_to_current_working_directory>`</br>
+             `echo "wow"` => wow</br>
+             `export x=5`</br>
+             `echo "Hello $x"` => Hello 5</br>
 6. Expression evaluation
     * **Commands**: `export`
     * **Details**: Set values to variables and print variables values. No mathematical operations is needed.
