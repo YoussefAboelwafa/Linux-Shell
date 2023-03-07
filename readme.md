@@ -18,7 +18,7 @@ This shell supports the following commands:
     * **Concepts**: Background execution, signals & signal handlers
 5. Shell builtin commands
     * **Commands**: `cd` & `echo`
-    * **Details**: for the case of:</br>
+    * **Details**:</br>
              `cd ~` </br>
              `cd ..`</br>
              `cd <absolute_path>`</br>
