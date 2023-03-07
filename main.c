@@ -25,7 +25,7 @@ int i;
 int k;
 FILE *file;
 int flag=0;
-
+pid_t id;
 // functions prototypes
 void shell();
 void execute_command();
@@ -33,13 +33,14 @@ void shell_builtin_commands(char[]);
 void reap_child_zombie(pid_t);
 void write_to_log_file(pid_t);
 void on_child_exit(pid_t);
+void on_signal_exit();
 void remove_quotes(char*);
 void replace_string(char*,char*,char*);
 char* extract_after_equal_sign(char*);
 
 int main()
 {   
-    //signal (SIGCHLD, on_child_exit);
+    signal (SIGCHLD, on_signal_exit);
     file = fopen("logs.txt", "w");
     shell();
     return 0;
@@ -139,6 +140,7 @@ void shell_builtin_commands(char string[])
 void execute_command()
 {   
     pid_t pid = fork();
+    id=pid;
     // Error
     if (pid < 0)
     {
@@ -159,25 +161,35 @@ void execute_command()
     }
     // In the parent
     else
-    {
+    {   
+        
         on_child_exit(pid);
+        
         
     }
 }
 
 void reap_child_zombie(pid_t pid){
-    int status;
-    
-    waitpid(pid, &status, 0);
-    
-    
+    int status;   
+    waitpid(0, &status, 0);  
 }
 void write_to_log_file(pid_t pid){
     fprintf(file, "Child process (%d) terminated\n", pid);
 }
 void on_child_exit(pid_t pid){
-    reap_child_zombie(pid);
+    //printf("child %d\n",pid);
+    reap_child_zombie(pid); 
     write_to_log_file(pid);
+    
+}
+void on_signal_exit(){
+    //printf("child %d\n",id);
+    int var;
+    int status;
+    var=waitpid(0,&status,0);
+    if(var>=0){
+        write_to_log_file(id);
+    }
 }
 
 void remove_quotes(char* str) {
