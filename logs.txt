@@ -1,3 +1,0 @@
-Child process (12755) terminated
-Child process (12756) terminated
-Child process (12760) terminated
