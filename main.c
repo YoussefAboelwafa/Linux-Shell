@@ -97,7 +97,7 @@ void shell()
         // Exit if the user enters "exit" as the command
         if (strcmp(args[0], "exit") == 0)
         {
-            // zombie before exit
+            // kill zombie before exit
             kill(id, SIGKILL);
             on_signal_exit();
 
@@ -183,7 +183,7 @@ void execute_command()
 void on_child_exit(pid_t pid)
 {
     int status;
-    waitpid(0, &status, 0);
+    waitpid(pid, &status, 0);
     write_to_log_file(pid);
 }
 
@@ -191,7 +191,7 @@ void on_signal_exit()
 {
     int var;
     int status;
-    var = waitpid(0, &status, 0);
+    var = waitpid(id, &status, 0);
     if (var >= 0)
     {
         write_to_log_file(id);
