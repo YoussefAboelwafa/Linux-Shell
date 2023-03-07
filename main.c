@@ -31,7 +31,6 @@ pid_t id;
 void shell();
 void execute_command();
 void shell_builtin_commands(char[]);
-void reap_child_zombie(pid_t);
 void write_to_log_file(pid_t);
 void on_child_exit(pid_t);
 void on_signal_exit();
@@ -174,24 +173,16 @@ void execute_command()
     }
 }
 
-void reap_child_zombie(pid_t pid)
+
+void on_child_exit(pid_t pid)
 {
     int status;
     waitpid(0, &status, 0);
-}
-void write_to_log_file(pid_t pid)
-{
-    fprintf(file, "Child process (%d) terminated\n", pid);
-}
-void on_child_exit(pid_t pid)
-{
-    // printf("child %d\n",pid);
-    reap_child_zombie(pid);
     write_to_log_file(pid);
 }
+
 void on_signal_exit()
 {
-    // printf("child %d\n",id);
     int var;
     int status;
     var = waitpid(0, &status, 0);
@@ -201,8 +192,12 @@ void on_signal_exit()
     }
 }
 
-void remove_quotes(char *str)
+void write_to_log_file(pid_t pid)
 {
+    fprintf(file, "Child process (%d) terminated\n", pid);
+}
+
+void remove_quotes(char *str){
     char *dest = str;
     while (*str)
     {
@@ -215,8 +210,7 @@ void remove_quotes(char *str)
     *dest = '\0';
 }
 
-void replace_string(char *original_string, char *find_string, char *replace_string)
-{
+void replace_string(char *original_string, char *find_string, char *replace_string){
     char *occurrence = strstr(original_string, find_string);
     size_t find_len = strlen(find_string);
 
@@ -234,8 +228,8 @@ void replace_string(char *original_string, char *find_string, char *replace_stri
         occurrence = strstr(original_string + occurrence_index + replace_len, find_string);
     }
 }
-char *extract_after_equal_sign(char *input_string)
-{
+
+char *extract_after_equal_sign(char *input_string){
 
     char *occurrence = strchr(input_string, '='); // find the first occurrence of '='
 
