@@ -43,6 +43,7 @@ int main()
     signal(SIGCHLD, on_signal_exit);
     file = fopen("logs.txt", "w");
     shell();
+
     return 0;
 }
 
@@ -73,38 +74,72 @@ void shell()
         command[strcspn(command, "\n")] = '\0';
 
         // Parse the input into tokens
-
-        token = strtok(command, " ");
-        i = 0;
-
-        while (token != NULL)
+        char temp[1000];
+        strcpy(temp, command);
+        char *hamo = strtok(temp, " ");
+        if (strcmp(hamo, "export") == 0)
         {
-            args[i++] = token;
 
-            token = strtok(NULL, " ");
+            token = command;
+            args[0] = strsep(&token, " ");
+            args[1] = token;
+            remove_quotes(args[1]);
         }
-
-        args[i] = NULL;
-
-        if (args[1] != NULL)
+        else
         {
-            if (strcmp(args[1], "&") == 0)
+            token = strtok(command, " ");
+            i = 0;
+            while (token != NULL)
             {
-                flag = 1;
+                args[i++] = token;
+
+                token = strtok(NULL, " ");
+            }
+
+            args[i] = NULL;
+
+            if (args[1] != NULL)
+            {
+                if (strcmp(args[1], "&") == 0)
+                {
+                    flag = 1;
+                }
+            }
+            for (int j = 0; args[j] != NULL; j++)
+            {
+                if (args[j][0] == '$')
+                {
+                    char temp[50];
+                    int l = 0;
+                    for (k = 1; args[1][k] != '\0'; k++)
+                    {
+                        temp[l++] = args[1][k];
+                    }
+                    temp[l] = '\0';
+                    char *g = getenv(temp);
+                    strcpy(temp, g);
+                    l = 1;
+                    token = strtok(temp, " ");
+                    while (token != NULL)
+                    {
+                        args[l++] = token;
+                        token = strtok(NULL, " ");
+                    }
+                    args[l] = NULL;
+                }
+            }
+
+            // Exit if the user enters "exit" as the command
+            if (strcmp(args[0], "exit") == 0)
+            {
+                // kill zombie before exit
+                kill(id, SIGKILL);
+                on_signal_exit();
+
+                fclose(file);
+                exit(EXIT_SUCCESS);
             }
         }
-
-        // Exit if the user enters "exit" as the command
-        if (strcmp(args[0], "exit") == 0)
-        {
-            // kill zombie before exit
-            kill(id, SIGKILL);
-            on_signal_exit();
-
-            fclose(file);
-            exit(EXIT_SUCCESS);
-        }
-
         if (strcmp(args[0], "echo") == 0 || strcmp(args[0], "cd") == 0 || strcmp(args[0], "export") == 0)
         {
             char *c = args[0];
@@ -120,17 +155,19 @@ void shell()
 void shell_builtin_commands(char string[])
 {
     if (strcmp(string, "cd") == 0)
-    {   int e;
+    {
+        int e;
         // (~) to go Home
         if (strcmp(args[1], "~") == 0)
-        {   
+        {
             chdir(getenv("HOME"));
         }
-        else {
-            e=chdir(args[1]);
+        else
+        {
+            e = chdir(args[1]);
         }
         // if invalid path name
-        if(e==-1)
+        if (e == -1)
         {
             perror("Failed to execute command");
             shell();
@@ -139,17 +176,29 @@ void shell_builtin_commands(char string[])
 
     else if (strcmp(string, "echo") == 0)
     {
-        char *dollar="$x";
-        replace_string(args[1], dollar, value);
-        // Otherwise, print the argument as is
-        remove_quotes(args[1]);
-        printf("%s\n", args[1]);
+
+        if (args[1][0] == '$')
+        {
+            char temp[100];
+            int c = 0;
+            for (int j = 1; args[1][j] != '\0'; j++)
+            {
+                temp[c++] = args[1][j];
+            }
+            temp[c] = '\0';
+
+            args[1] = getenv(temp);
+        }
+        for (int j = 1; args[j] != NULL; j++)
+            printf("%s\n", args[j]);
     }
     else if (strcmp(string, "export") == 0)
     {
-        value = extract_after_equal_sign(args[1]);
-        remove_quotes(value);
-        printf("%s\n", value);
+        token = strtok(args[1], "=");
+        char *name = token;
+        token = strtok(NULL, "=");
+        value = token;
+        setenv(name, value, 1);
     }
 }
 

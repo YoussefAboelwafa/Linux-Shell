@@ -1,5 +1,6 @@
 {
     "files.associations": {
-        "OK.C": "cpp"
+        "OK.C": "cpp",
+        "cstdlib": "c"
     }
 }
