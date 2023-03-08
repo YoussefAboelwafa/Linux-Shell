@@ -41,7 +41,6 @@ char *extract_after_equal_sign(char *);
 int main()
 {
     signal(SIGCHLD, on_signal_exit);
-    file = fopen("logs.txt", "w");
     shell();
 
     return 0;
@@ -136,7 +135,6 @@ void shell()
                 kill(id, SIGKILL);
                 on_signal_exit();
 
-                fclose(file);
                 exit(EXIT_SUCCESS);
             }
         }
@@ -252,7 +250,9 @@ void on_signal_exit()
 
 void write_to_log_file(pid_t pid)
 {
+    file = fopen("/media/youssef/Others/2nd term/OS/labs/simple-shell/logs.txt", "a");
     fprintf(file, "Child process (%d) terminated\n", pid);
+    fclose(file);
 }
 
 void remove_quotes(char *str)
