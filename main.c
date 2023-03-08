@@ -120,14 +120,18 @@ void shell()
 void shell_builtin_commands(char string[])
 {
     if (strcmp(string, "cd") == 0)
-    {
-        // (~) to go /home
+    {   int e;
+        // (~) to go Home
         if (strcmp(args[1], "~") == 0)
-        {
-            args[1] = "/home";
+        {   
+            chdir(getenv("HOME"));
+        }
+        
+        else {
+            e=chdir(args[1]);
         }
         // if invalid path name
-        if (chdir(args[1]) == -1)
+        if(e==-1)
         {
             perror("Failed to execute command");
             exit(EXIT_FAILURE);
