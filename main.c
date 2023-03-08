@@ -133,6 +133,10 @@ void shell()
             {
                 // kill zombie before exit
                 kill(id, SIGKILL);
+                file = fopen("/media/youssef/Others/2nd term/OS/labs/simple-shell/logs.txt", "a");
+                fprintf(file, "\n***** Session terminated *****\n");
+                fclose(file);
+
                 on_signal_exit();
 
                 exit(EXIT_SUCCESS);
@@ -187,6 +191,7 @@ void shell_builtin_commands(char string[])
 
             args[1] = getenv(temp);
         }
+        remove_quotes(args[1]);
         for (int j = 1; args[j] != NULL; j++)
             printf("%s\n", args[j]);
     }
