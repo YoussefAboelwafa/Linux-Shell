@@ -61,7 +61,7 @@ void shell()
         if (!fgets(command, MAX_COMMAND_LENGTH, stdin))
         {
             perror("Failed to read input");
-            exit(EXIT_FAILURE);
+            shell();
         }
         // repeat function if ENTER button is pressed
         if (command[0] == '\n')
@@ -126,7 +126,6 @@ void shell_builtin_commands(char string[])
         {   
             chdir(getenv("HOME"));
         }
-        
         else {
             e=chdir(args[1]);
         }
@@ -134,14 +133,14 @@ void shell_builtin_commands(char string[])
         if(e==-1)
         {
             perror("Failed to execute command");
-            exit(EXIT_FAILURE);
+            shell();
         }
     }
 
     else if (strcmp(string, "echo") == 0)
     {
-
-        replace_string(args[1], "$x", value);
+        char *dollar="$x";
+        replace_string(args[1], dollar, value);
         // Otherwise, print the argument as is
         remove_quotes(args[1]);
         printf("%s\n", args[1]);
